@@ -56,8 +56,6 @@ def single_method(pre):
                   scri = ntd.text.strip() if ntd is not None else None
                   dict = {'name':name,'scri':scri}
                   parameters.append(dict)
-                  print(name)
-                  print(scri)
               method['parameters'] = parameters
            elif classify == "Returns":
               ftd = ta.find("td")
@@ -66,8 +64,6 @@ def single_method(pre):
               scri = ntd.text.strip() if ntd is not None else None
               dict = {'type':type,'scri':scri}
               returns.append(dict)
-              print(type)
-              print(scri)
               method['returns'] = returns
            elif classify == "Throws":
                trs = ta.find_all("tr")
@@ -135,20 +131,24 @@ def inhconstantsfunc(self):
 #constants
 def constantsfunc(self):
     constants = []
+    soup_html = BeautifulSoup(self['html'][0], "lxml")
     try:
+
         for p in self['constants_n']:
             soup = BeautifulSoup(p, "lxml")
             table = soup.select("table tr") #包含类型 属性名 描述信息的标签
             names = []
             for i in range(1,len(table)):
                 tr = table[i]
+
                 tmp = tr.select("td:nth-of-type(2) code")[0]
+
                 name = tmp.get_text().strip() if tmp is not None else None
                 if name not in names:
                     names.append(name)
                     tmp = tr.find("code")
                     type = tmp.get_text().strip() if tmp is not None else None
-                    hs = soup.find_all('h3', class_='api-name', text=name)
+                    hs = soup_html.find_all('h3', class_='api-name', text=name)
                     for h in hs:
                         sf = single_field(h.parent.find("pre"))
                         sf['type'] = type
@@ -164,6 +164,7 @@ def constantsfunc(self):
 #enumconstants
 def enumconstantsfunc(self):
     enumconstants = []
+    soup_html = BeautifulSoup(self['html'][0], "lxml")
     try:
         for p in self['enumconstants_n']:
             soup = BeautifulSoup(p, "lxml")
@@ -177,8 +178,7 @@ def enumconstantsfunc(self):
                     names.append(name)
                     tmp = tr.find("code")
                     type = tmp.get_text().strip() if tmp is not None else None
-                    print(name)
-                    hs = soup.find_all('h3', class_='api-name', text=name)
+                    hs = soup_html.find_all('h3', class_='api-name', text=name)
                     for h in hs:
                         sf = single_field(h.parent.find("pre"))
                         sf['type'] = type
@@ -195,6 +195,7 @@ def enumconstantsfunc(self):
 #类属性
 def lfieldsfunc(self):
     lfields = []
+    soup_html = BeautifulSoup(self['html'][0], "lxml")
     try:
         for p in self['lfields_n']:
             soup = BeautifulSoup(p, "lxml")
@@ -208,8 +209,7 @@ def lfieldsfunc(self):
                     names.append(name)
                     tmp = tr.find("code")
                     type = tmp.get_text().strip() if tmp is not None else None
-                    print(name)
-                    hs = soup.find_all('h3', class_='api-name', text=name)
+                    hs = soup_html.find_all('h3', class_='api-name', text=name)
                     for h in hs:
                         sf = single_field(h.parent.find("pre"))
                         sf['type'] = type
@@ -319,6 +319,33 @@ def pubconstructorsfunc(self):
     pubconstructors = json.dumps(pubconstructors)
     return pubconstructors
 
+#proctors
+def proctorsfunc(self):
+    proctors = []
+    soup_html = BeautifulSoup(self['html'][0], "lxml")
+    try:
+        for p in self['proctors_n']:
+            soup = BeautifulSoup(p, "lxml")
+            table = soup.select("table tr")  # 包含类型 属性名 描述信息的标签
+            names = []
+            for i in range(1, len(table)):
+                tr = table[i]
+                tmp = tr.find("a")
+                name = tmp.get_text().strip() if tmp is not None else None
+
+                if name not in names:
+                    names.append(name)
+                    res = soup_html.find_all('h3', class_='api-name', text=name)
+                    for h in res:
+                        sm = single_method(h.parent.find("pre"))
+                        proctors.append(sm)
+    except:
+        proctors = None
+        # print("proctors-----None")
+
+    proctors = json.dumps(proctors)
+    return proctors
+
 
 #lattrs
 def lattrsfunc(self):
@@ -403,10 +430,6 @@ def inhmethodsfunc(self):
     return inhmethods
 
 
-
-
-
-
 class ClassItem(scrapy.Item):
     id = scrapy.Field()
     package = scrapy.Field()
@@ -428,13 +451,14 @@ class ClassItem(scrapy.Item):
     constants_n = scrapy.Field()
     enumconstants_n = scrapy.Field()
     promethods_n = scrapy.Field()
+    proctors_n = scrapy.Field()
 
     def get_insert_sql(self):
         insert_sql = """
            insert into scrapy_class(id,package,package_url,class_name,url,crawl_time,summary_inhconstants,summary_lfields,
-                  summary_pubmethods,sumamary_inhmethods,class_info,summary_pubconstructors,summary_lattrs,summary_constants,summary_enumconstants,
-                  summary_promethods)
-           values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                  summary_pubmethods,summary_inhmethods,class_info,summary_pubconstructors,summary_lattrs,summary_constants,summary_enumconstants,
+                  summary_promethods,summary_proctors)
+           values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
            ON DUPLICATE KEY UPDATE crawl_time=values(crawl_time)
         """
         crawl_time = datetime.datetime.now().strftime(SQL_DATETIME_FORMAT)
@@ -447,7 +471,7 @@ class ClassItem(scrapy.Item):
         summary_inhconstants = inhconstantsfunc(self)
         summary_lfields = lfieldsfunc(self)
         summary_pubmethods = pubmethodsfunc(self)
-        sumamary_inhmethods = inhmethodsfunc(self)
+        summary_inhmethods = inhmethodsfunc(self)
 
 
         class_info = classinfofunc(self)
@@ -457,13 +481,13 @@ class ClassItem(scrapy.Item):
         summary_constants = constantsfunc(self)
         summary_enumconstants = enumconstantsfunc(self)
         summary_promethods = promethodsfunc(self)
-
+        summary_proctors = proctorsfunc(self)
 
         #print(summary_inhconstants)
         #print(inhconstants_descrs)
         params = (id,package,package_url,class_name,url,crawl_time,summary_inhconstants,summary_lfields,
-                  summary_pubmethods,sumamary_inhmethods,class_info,summary_pubconstructors,summary_lattrs,summary_constants,summary_enumconstants,
-                  summary_promethods)
+                  summary_pubmethods,summary_inhmethods,class_info,summary_pubconstructors,summary_lattrs,summary_constants,summary_enumconstants,
+                  summary_promethods,summary_proctors)
         return insert_sql,params
 
 

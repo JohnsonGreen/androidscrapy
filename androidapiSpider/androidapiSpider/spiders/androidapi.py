@@ -103,6 +103,7 @@ class AndroidapiSpider(scrapy.Spider):
         item_loader.add_css("constants_n", "#constants")
         item_loader.add_css("enumconstants_n", "#enumconstants")
         item_loader.add_css("promethods_n", "#promethods")
+        item_loader.add_css("proctors_n", "#proctors")
 
 
 
