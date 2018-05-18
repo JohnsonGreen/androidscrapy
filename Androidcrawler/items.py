@@ -5,21 +5,17 @@
 # See documentation in:
 # https://doc.scrapy.org/en/latest/topics/items.html
 
-import scrapy
+
 import datetime
 import re
 import bs4
 from bs4 import BeautifulSoup
 
 import json
-from androidapiSpider.settings import SQL_DATETIME_FORMAT, SQL_DATE_FORMAT
-from scrapy.loader.processors import MapCompose, TakeFirst, Join
 
-class AndroidapispiderItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
+SQL_DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
+SQL_DATE_FORMAT = "%Y-%m-%d"
 
-    pass
 
 
 def filterlabel(html):
@@ -384,7 +380,7 @@ def classinfofunc(self):
     desflag = False
     descri = ''
     extends = ''
-    print(h1)
+    #print(h1)
     if h1:
         for sib in h1.next_siblings:
             if isinstance(sib, bs4.element.Tag):
@@ -469,70 +465,3 @@ def get_insert_sql(self):
               summary_promethods,summary_proctors)
     return insert_sql,params
 
-class ClassItem(scrapy.Item):
-    id = scrapy.Field()
-    package = scrapy.Field()
-    package_url = scrapy.Field()
-    class_name = scrapy.Field()
-    url = scrapy.Field()
-    html = scrapy.Field()
-
-    #class_description
-    title_p = scrapy.Field()
-
-    #summary
-    inhconstants_n = scrapy.Field()
-    lfields_n = scrapy.Field()
-    pubmethods_n = scrapy.Field()
-    inhmethods_n = scrapy.Field()
-    pubconstructors_n = scrapy.Field()
-    lattrs_n = scrapy.Field()
-    constants_n = scrapy.Field()
-    enumconstants_n = scrapy.Field()
-    promethods_n = scrapy.Field()
-    proctors_n = scrapy.Field()
-
-    def get_insert_sql(self):
-        insert_sql = """
-           insert into scrapy_class(id,package,package_url,class_name,url,crawl_time,summary_inhconstants,summary_lfields,
-                  summary_pubmethods,summary_inhmethods,class_info,summary_pubconstructors,summary_lattrs,summary_constants,summary_enumconstants,
-                  summary_promethods,summary_proctors)
-           values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-           ON DUPLICATE KEY UPDATE crawl_time=values(crawl_time)
-        """
-        crawl_time = datetime.datetime.now().strftime(SQL_DATETIME_FORMAT)
-        package = self["package"][0]
-        package_url = self["package_url"][0]
-        class_name = self["class_name"][0]
-        url = self["url"][0]
-        id = int(self["id"][0])
-
-        summary_inhconstants = inhconstantsfunc(self)
-        summary_lfields = lfieldsfunc(self)
-        summary_pubmethods = pubmethodsfunc(self)
-        summary_inhmethods = inhmethodsfunc(self)
-
-
-        class_info = classinfofunc(self)
-
-        summary_pubconstructors = pubconstructorsfunc(self)
-        summary_lattrs = lattrsfunc(self)
-        summary_constants = constantsfunc(self)
-        summary_enumconstants = enumconstantsfunc(self)
-        summary_promethods = promethodsfunc(self)
-        summary_proctors = proctorsfunc(self)
-
-        #print(summary_inhconstants)
-        #print(inhconstants_descrs)
-        params = (id,package,package_url,class_name,url,crawl_time,summary_inhconstants,summary_lfields,
-                  summary_pubmethods,summary_inhmethods,class_info,summary_pubconstructors,summary_lattrs,summary_constants,summary_enumconstants,
-                  summary_promethods,summary_proctors)
-        return insert_sql,params
-
-
-
-
-
-class OverviewItem(scrapy.Item):
-
-    pass

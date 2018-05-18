@@ -6,8 +6,13 @@ import time
 import datetime
 from scrapy.http import Request
 from urllib import parse
+
+import MySQLdb
+import MySQLdb.cursors
 from scrapy.loader import ItemLoader
-from androidapiSpider.items import ClassItem,OverviewItem
+from androidapiSpider.items import ClassItem,OverviewItem,get_insert_sql
+
+
 
 
 
@@ -31,14 +36,13 @@ class AndroidapiSpider(scrapy.Spider):
 
 
         # item = {}
-        # item['id'] = "2263"
-        # item['url'] = "reference/android/text/TextPaint"
-        # item['package'] = "android.text"
+        # item['id'] = "22"
+        # item['url'] = "reference/android/accessibilityservice/AccessibilityService.GestureResultCallback"
+        # item['package'] = "android.accessibilityservice"
         # item['package_url'] = "reference/android/text/package-summary.html"
-        # item['class_name'] = "TextPaint"
-        # request_url = self.base_url + "reference/android/text/TextPaint"
+        # item['class_name'] = "AccessibilityService.GestureResultCallback"
+        # request_url = self.base_url + "reference/android/accessibilityservice/AccessibilityService.GestureResultCallback"
         # yield scrapy.Request(request_url, meta={"item": item}, callback=self.parse_class, dont_filter=True)
-
 
 
         item = {}
@@ -91,14 +95,8 @@ class AndroidapiSpider(scrapy.Spider):
         item_loader.add_value("id", item['id'])
         html = str(response.body, 'utf-8').replace('\n','')
 
-
-        #检查获得的数据
-        with open("ht.html", "a",encoding='utf-8') as f:
-            f.write(html+"\n\n-----------------------------------------------------------------------\n\n")
-
        # print(html)
         item_loader.add_value("html", html)
-
 
         #继承常量
         item_loader.add_css("inhconstants_n","#inhconstants table")
@@ -106,16 +104,25 @@ class AndroidapiSpider(scrapy.Spider):
         item_loader.add_css("pubmethods_n", "#pubmethods")
         item_loader.add_css("inhmethods_n", "#inhmethods")
         item_loader.add_css("pubconstructors_n", "#pubctors")
-        item_loader.add_css("pubconstructors_n", "#pubctors")
         item_loader.add_css("lattrs_n", "#lattrs")
         item_loader.add_css("constants_n", "#constants")
         item_loader.add_css("enumconstants_n", "#enumconstants")
         item_loader.add_css("promethods_n", "#promethods")
         item_loader.add_css("proctors_n", "#proctors")
 
+        if int(item["id"]) == 25:
+            print(html)
 
 
         classitem = item_loader.load_item()
+
+        print(classitem)
+
+        insert_sql, params = get_insert_sql(classitem)
+
+        #print(params[10])
+
+
         return classitem
 
 
