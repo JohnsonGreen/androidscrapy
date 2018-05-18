@@ -14,7 +14,7 @@ from androidapiSpider.items import ClassItem,OverviewItem
 class AndroidapiSpider(scrapy.Spider):
     name = 'androidapi'
     allowed_domains = ['https://developer.android.com/reference/']
-    start_urls = ['https://developer.android.com/reference/index.html']
+    start_urls = ['https://developer.android.com/reference/']
     #start_urls = ['https://developer.android.com/reference/index.html']
     base_url = 'https://developer.android.com/'
 
@@ -29,22 +29,24 @@ class AndroidapiSpider(scrapy.Spider):
         #     if matobj:
         #        post_urls.append(matobj.group(1))
 
-        """
-        item = {}
-        item['id'] = "0"
-        item['url'] = "hehe"
-        item['package'] = "hehe"
-        item['package_url'] = "hehe"
-        item['class_name'] = "hehe"
-        request_url = self.base_url + "reference/android/accounts/AuthenticatorDescription"
-        yield scrapy.Request(request_url, meta={"item": item}, callback=self.parse_class, dont_filter=True)
-        """
+
+        # item = {}
+        # item['id'] = "2263"
+        # item['url'] = "reference/android/text/TextPaint"
+        # item['package'] = "android.text"
+        # item['package_url'] = "reference/android/text/package-summary.html"
+        # item['class_name'] = "TextPaint"
+        # request_url = self.base_url + "reference/android/text/TextPaint"
+        # yield scrapy.Request(request_url, meta={"item": item}, callback=self.parse_class, dont_filter=True)
+
 
 
         item = {}
         with open("urls.txt", "r") as f:
             lines = f.readlines()
-            for line in lines:
+            for i in range(len(lines)):
+                line = lines[i]
+                print(i)
                 elements = line.split(",")
                 item['id'] = elements[0]
                 item['url'] = elements[1].replace(".html",'')
@@ -88,6 +90,12 @@ class AndroidapiSpider(scrapy.Spider):
         item_loader.add_value("url",item['url'])
         item_loader.add_value("id", item['id'])
         html = str(response.body, 'utf-8').replace('\n','')
+
+
+        #检查获得的数据
+        with open("ht.html", "a",encoding='utf-8') as f:
+            f.write(html+"\n\n-----------------------------------------------------------------------\n\n")
+
        # print(html)
         item_loader.add_value("html", html)
 

@@ -30,6 +30,25 @@ sys.path.append(cur_dir)
 #             print(url)
 
 
+
+# new data
+# result = json.load(open("newTree.json", encoding='utf-8'))
+# i=0
+# with open("urls.txt", "w") as f:
+#   for package_info in result:
+#      package = package_info[""]
+#      package_url = package_info[1]
+#      package_children = package_info[2]
+#      for family in package_children:
+#         category = family[0]
+#         namesandurls = family[2]
+#         for single in namesandurls:
+#             name = single[0]
+#             url = single[1]
+#             i += 1
+#             f.write(str(i)+","+url+","+package+","+package_url+","+name+"\n")
+#             print(url)
+
 # with open("urls.txt", "r") as f:
 #    lines = f.readlines()
 #    for line in lines:

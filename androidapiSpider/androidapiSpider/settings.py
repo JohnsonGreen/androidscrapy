@@ -14,7 +14,11 @@ BOT_NAME = 'androidapiSpider'
 SPIDER_MODULES = ['androidapiSpider.spiders']
 NEWSPIDER_MODULE = 'androidapiSpider.spiders'
 
+#DOWNLOAD_DELAY = 3
 
+CONCURRENT_REQUESTS = 1
+
+REDIRECT_ENABLED = False  #禁止重定向
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'androidapiSpider (+http://www.yourdomain.com)'
 
@@ -67,7 +71,8 @@ ROBOTSTXT_OBEY = False
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'androidapiSpider.pipelines.MysqlTwistedPipline': 300,
+    #'androidapiSpider.pipelines.MysqlTwistedPipline': 300,
+    'androidapiSpider.pipelines.MysqlPipeline':400
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
@@ -93,7 +98,7 @@ ITEM_PIPELINES = {
 
 #Retry
 RETRY_ENABLED = True
-RETRY_TIMES = 10
+RETRY_TIMES = 5
 
 
 USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:51.0) Gecko/20100101 Firefox/51.0"
@@ -101,7 +106,7 @@ USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:51.0) Gecko/20100101 Firefo
 RANDOM_UA_TYPE = "random"
 
 MYSQL_HOST = "127.0.0.1"
-MYSQL_DBNAME = "scrapyspider"
+MYSQL_DBNAME = "scrapy"
 MYSQL_USER = "root"
 MYSQL_PASSWORD = ""
 
